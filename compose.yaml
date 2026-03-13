@@ -59,12 +59,20 @@ services:
         volumes:
             - ollama_models:/root/.ollama/models
         restart: unless-stopped
-#
-#    weaviate:
-#        image: semitechnologies/weaviate
-#        environment:
-#            QUERY_DEFAULTS_LIMIT: 20
-#            AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+
+    embedding-service:
+        build: ./embedding-service
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.embedding.rule=Host(`embedding.localhost`)"
+            - "traefik.http.services.embedding.loadbalancer.server.port=8091"
+
+    weaviate:
+        image: semitechnologies/weaviate
+        environment:
+            QUERY_DEFAULTS_LIMIT: 20
+            AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+        restart: unless-stopped
 
 volumes:
     user_home:

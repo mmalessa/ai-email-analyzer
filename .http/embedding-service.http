@@ -1,0 +1,7 @@
+### Generate embedding for email text
+POST http://embedding.localhost/embed
+Content-Type: application/json
+
+{
+  "text": "Nie Lokomotywa. Przyjedźcie i naprawcie."
+}
