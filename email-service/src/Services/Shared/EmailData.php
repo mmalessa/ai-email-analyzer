@@ -6,14 +6,18 @@ namespace App\Services\Shared;
 
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-readonly class EmailData
+class EmailData
 {
+    public string $fromDomain {
+        get => substr($this->from, strrpos($this->from, '@') + 1);
+    }
+
     public function __construct(
-        public string $receivedAt,
-        public string $from,
-        public string $to,
-        public string $subject,
-        public string $body,
+        public readonly string $receivedAt,
+        public readonly string $from,
+        public readonly string $to,
+        public readonly string $subject,
+        public readonly string $body,
     ) {}
 
     public static function fromArray(array $data): self

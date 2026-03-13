@@ -66,6 +66,9 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.embedding.rule=Host(`embedding.localhost`)"
             - "traefik.http.services.embedding.loadbalancer.server.port=8091"
+        restart: unless-stopped
+        depends_on:
+            -   weaviate
 
     weaviate:
         image: semitechnologies/weaviate

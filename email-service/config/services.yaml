@@ -5,6 +5,9 @@ parameters:
     app.ollama_temperature_incident: '%env(float:OLLAMA_TEMPERATURE_INCIDENT)%'
     app.ollama_temperature_emotions: '%env(float:OLLAMA_TEMPERATURE_EMOTIONS)%'
     app.language_detector_confidence_threshold: '%env(float:LANGUAGE_DETECTOR_CONFIDENCE_THRESHOLD)%'
+    app.ollama_embedding_model: '%env(OLLAMA_EMBEDDING_MODEL)%'
+    app.weaviate_url: '%env(WEAVIATE_URL)%'
+    app.weaviate_similar_incident_limit: '%env(int:WEAVIATE_SIMILAR_INCIDENT_LIMIT)%'
 
 services:
     _defaults:
@@ -26,6 +29,18 @@ services:
             $temperatureIncident: '%app.ollama_temperature_incident%'
             $temperatureEmotions: '%app.ollama_temperature_emotions%'
 
+    App\Services\EmbeddingService\OllamaEmbeddingService:
+        arguments:
+            $baseUrl: '%app.ollama_url%'
+            $model: '%app.ollama_embedding_model%'
+
+    App\Services\ContextBuilder\Repository\WeaviateSimilarIncidentRepository:
+        arguments:
+            $baseUrl: '%app.weaviate_url%'
+            $similarIncidentLimit: '%app.weaviate_similar_incident_limit%'
+
+    App\Services\EmbeddingService\EmbeddingService: '@App\Services\EmbeddingService\OllamaEmbeddingService'
+
     App\EventListener\ExceptionListener:
         arguments:
             $appEnv: '%kernel.environment%'
@@ -34,4 +49,4 @@ services:
     App\Services\LLMExtractor\LLMExtractor: '@App\Services\LLMExtractor\OllamaLLMExtractor'
     App\Services\ContextBuilder\Repository\CandidateLocationRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateLocationRepository'
     App\Services\ContextBuilder\Repository\CandidateDeviceRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateDeviceRepository'
-    App\Services\ContextBuilder\Repository\SimilarIncidentRepository: '@App\Services\ContextBuilder\Repository\InMemorySimilarIncidentRepository'
+    App\Services\ContextBuilder\Repository\SimilarIncidentRepository: '@App\Services\ContextBuilder\Repository\WeaviateSimilarIncidentRepository'

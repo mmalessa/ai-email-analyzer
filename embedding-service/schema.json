@@ -1,0 +1,63 @@
+{
+  "class": "Incident",
+  "description": "Historical incidents for RAG similarity search",
+  "vectorizer": "none",
+  "properties": [
+    {
+      "name": "incident_id",
+      "dataType": ["text"],
+      "description": "Unique identifier of the incident",
+      "indexFilterable": true
+    },
+    {
+      "name": "text",
+      "dataType": ["text"],
+      "description": "Full incident description used for embeddings",
+      "indexSearchable": true
+    },
+    {
+      "name": "device",
+      "dataType": ["text"],
+      "description": "Device type involved in the incident",
+      "indexFilterable": true,
+      "indexSearchable": true
+    },
+    {
+      "name": "location",
+      "dataType": ["text"],
+      "description": "Location where the incident occurred",
+      "indexFilterable": true,
+      "indexSearchable": true
+    },
+    {
+      "name": "symptom",
+      "dataType": ["text"],
+      "description": "Description of the problem or symptom",
+      "indexSearchable": true
+    },
+    {
+      "name": "language",
+      "dataType": ["text"],
+      "description": "ISO language code (e.g. pl_PL, en_GB)",
+      "indexFilterable": true
+    },
+    {
+      "name": "email_from",
+      "dataType": ["text"],
+      "description": "Sender email address",
+      "indexFilterable": true
+    },
+    {
+      "name": "email_domain",
+      "dataType": ["text"],
+      "description": "Domain extracted from email address",
+      "indexFilterable": true
+    },
+    {
+      "name": "created_at",
+      "dataType": ["date"],
+      "description": "Timestamp when the incident occurred",
+      "indexFilterable": true
+    }
+  ]
+}

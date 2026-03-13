@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\ContextBuilder;
 
+use App\Services\Shared\Embedding;
+
 readonly class IncidentContextBundle
 {
     /**
@@ -16,5 +18,6 @@ readonly class IncidentContextBundle
         public array $candidateLocations = [],
         public array $candidateDevices = [],
         public array $similarIncidents = [],
+        public Embedding $embedding = new Embedding([]),
     ) {}
 }

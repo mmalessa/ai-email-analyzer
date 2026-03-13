@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Services\ContextBuilder\IncidentContextBuilder;
+use App\Services\ContextBuilder\Repository\SimilarIncidentRepository;
 use App\Services\ContextPromptBuilder\EmotionsContextPromptBuilder;
 use App\Services\ContextPromptBuilder\IncidentContextPromptBuilder;
+use App\Services\IncidentIdGenerator\IncidentIdGenerator;
 use App\Services\LanguageDetector\LanguageDetector;
 use App\Services\LLMExtractor\LLMExtractor;
 use App\Services\Shared\EmailData;
@@ -24,6 +26,8 @@ class AnalyzeController
         private IncidentContextPromptBuilder $incidentContextPromptBuilder,
         private EmotionsContextPromptBuilder $emotionsContextPromptBuilder,
         private LLMExtractor $llmExtractor,
+        private IncidentIdGenerator $incidentIdGenerator,
+        private SimilarIncidentRepository $similarIncidentRepository,
         private LoggerInterface $logger,
     ) {}
 
@@ -38,12 +42,13 @@ class AnalyzeController
 
         $emailData = EmailData::fromArray($data);
 
-        $this->logger->info('Analyzing email', ['from' => $emailData->from, 'subject' => $emailData->subject]);
+        $incidentId = $this->incidentIdGenerator->generate();
+        $this->logger->info('Analyzing email', ['incident_id' => $incidentId->value, 'from' => $emailData->from, 'subject' => $emailData->subject]);
 
         $isoCode = $this->languageDetector->detect($emailData->body);
         $this->logger->info('Language detected', ['language' => $isoCode->value]);
 
-        $incidentContextBundle = $this->incidentContextBuilder->build($isoCode);
+        $incidentContextBundle = $this->incidentContextBuilder->build($isoCode, $emailData);
         $this->logger->info('Context built', [
             'locations' => count($incidentContextBundle->candidateLocations),
             'devices' => count($incidentContextBundle->candidateDevices),
@@ -58,7 +63,19 @@ class AnalyzeController
         $emotions = $this->llmExtractor->extractEmotions($emotionsSystemPrompt, $emailData->body);
         $this->logger->info('Emotions extracted', ['sentiment' => $emotions->sentiment, 'intensity' => $emotions->intensity]);
 
+        $this->similarIncidentRepository->add(
+            embedding: $incidentContextBundle->embedding,
+            incidentId: $incidentId->value,
+            text: $emailData->body,
+            language: $isoCode->value,
+            emailFrom: $emailData->from,
+            emailDomain: $emailData->fromDomain,
+            createdAt: new \DateTimeImmutable($emailData->receivedAt),
+        );
+        $this->logger->info('Incident stored in Weaviate', ['incident_id' => $incidentId->value]);
+
         return new JsonResponse([
+            'incident_id' => $incidentId->value,
             ...$emailData->toArray(),
             'language' => $isoCode->value,
             'incidents' => array_map(fn($i) => $i->toArray(), $incidents),
