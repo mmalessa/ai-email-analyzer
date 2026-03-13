@@ -1,0 +1,45 @@
+### Language detect PL
+POST http://language.localhost/detect
+Accept: application/json
+Content-Type: application/json
+
+{
+ "text": "Dzisiaj jest ładna pogoda. Świeci słońce i nie pada deszcz."
+}
+
+
+### Language detect EN
+POST http://language.localhost/detect
+Accept: application/json
+Content-Type: application/json
+
+{
+  "text": "Good morning. I'd like to order a pizza."
+}
+
+### Language detect CS
+POST http://language.localhost/detect
+Accept: application/json
+Content-Type: application/json
+
+{
+  "text": "Dobré ráno. Rád/a bych si objednal/a salámovou pizzu."
+}
+
+### Language detect DE
+POST http://language.localhost/detect
+Accept: application/json
+Content-Type: application/json
+
+{
+  "text": "Guten Morgen. Ich möchte eine Pizza mit Salami und Hähnchen bestellen."
+}
+
+### Language detect HR
+POST http://language.localhost/detect
+Accept: application/json
+Content-Type: application/json
+
+{
+  "text": "Dobro jutro. Htio sam ići cestom uz more."
+}

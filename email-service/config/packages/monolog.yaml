@@ -1,0 +1,15 @@
+monolog:
+    channels:
+        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    handlers:
+        common_stdout:
+            type: stream
+            path: "php://stdout"
+            level: debug
+            verbosity_levels:
+                VERBOSITY_QUIET: debug
+                VERBOSITY_NORMAL: debug
+                VERBOSITY_VERBOSE: debug
+                VERBOSITY_VERY_VERBOSE: debug
+                VERBOSITY_DEBUG: debug
+

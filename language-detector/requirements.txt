@@ -1,0 +1,4 @@
+fasttext
+fastapi
+uvicorn
+numpy<2

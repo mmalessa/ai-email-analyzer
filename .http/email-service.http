@@ -1,0 +1,71 @@
+### Analyze email PL
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "maszynista@test.pl",
+  "to": "warsztat@test.pl",
+  "subject": "Awaria lokomotywy",
+  "body": "Na stacji w Krakowie Głównym przestała działać lokomotywa nr EN57-1234. Z przedziału silnikowego wydobywa się gęsty dym."
+}
+
+### Analyze email PL - multi
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "maszynista@test.pl",
+  "to": "warsztat@test.pl",
+  "subject": "Awaria lokomotywy",
+  "body": "Na stacji w Krakowie Głównym przestała działać lokomotywa nr EN57-1234. Z przedziału silnikowego wydobywa się gęsty dym. Poza tym obok, na sąsiednim torze stoi parowóz Ol49-50 z którego wydobywają się płomienie a maszynista ucieka."
+}
+
+### Analyze email PL - nice
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "maszynista@test.pl",
+  "to": "warsztat@test.pl",
+  "subject": "Światełko w lokomotywie",
+  "body": "Na stacji w Krakowie Głównym w lokomotywie nr EN57-1234 zaświeciło się takie wesołe zielone światełko. Chyba nieistotne, ale wolę zapytać."
+}
+
+### Analyze email CS
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "maszynista@test.pl",
+  "to": "dilna@test.pl",
+  "subject": "Porucha lokomotivy",
+  "body": "Na stanici Praha hlavní nádraží přestala fungovat lokomotiva č. EN57-1234. Z motorového prostoru vychází hustý kouř."
+}

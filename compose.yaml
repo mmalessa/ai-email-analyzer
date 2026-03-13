@@ -1,0 +1,71 @@
+services:
+
+    traefik:
+        image: traefik:v3.0
+        command:
+            - --api.dashboard=true
+            - --providers.docker=true
+            - --entrypoints.web.address=:80
+        ports:
+            - "80:80"
+            - "8088:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        restart: unless-stopped
+
+    email-service:
+        build: ./email-service
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.ai-api.rule=Host(`email.localhost`)"
+            - "traefik.http.routers.ai-api.entrypoints=web"
+            - "traefik.http.services.ai-api.loadbalancer.server.port=8080"
+#        tty: true
+        volumes:
+            - ./email-service:/app
+            - user_home:/home/appuser
+        command: ["php","-S","0.0.0.0:8080","-t","public"]
+        depends_on:
+#            - postgres
+            - ollama
+#            - weaviate
+#            - kafka
+            - language-detector
+        restart: unless-stopped
+
+    language-detector:
+        build: ./language-detector
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.lang.rule=Host(`language.localhost`)"
+            - "traefik.http.services.lang.loadbalancer.server.port=8090"
+
+#    postgres:
+#        image: postgres:16
+#        environment:
+#            POSTGRES_DB: analyzer
+#            POSTGRES_USER: demo
+#            POSTGRES_PASSWORD: demo
+#        volumes:
+#            - pgdata:/var/lib/postgresql/data
+#
+    ollama:
+        image: ollama/ollama:latest
+        container_name: ollama
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.ollama.rule=Host(`llm.localhost`)"
+            - "traefik.http.services.ollama.loadbalancer.server.port=11434"
+        volumes:
+            - ollama_models:/root/.ollama/models
+        restart: unless-stopped
+#
+#    weaviate:
+#        image: semitechnologies/weaviate
+#        environment:
+#            QUERY_DEFAULTS_LIMIT: 20
+#            AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+
+volumes:
+    user_home:
+    ollama_models:
