@@ -153,16 +153,3 @@ Content-Type: application/json
   }
 }
 ```
-
-### Detect language
-
-```
-POST http://language.localhost/detect
-Content-Type: application/json
-```
-
-```json
-{
-  "text": "Text to identify."
-}
-```
