@@ -2,7 +2,7 @@
 
 > **This is a Proof of Concept.** Not intended for production use.
 
-AI-powered email analysis system that detects language, extracts device incidents, and analyzes emotional tone of incoming maintenance emails. Incidents are stored in Weaviate vector database for similarity search.
+AI-powered email analysis system that detects language, extracts device incidents, and analyzes emotional tone of incoming maintenance emails. Incidents are stored in a PostgreSQL database (with pgvector) for similarity search.
 
 ## Architecture
 
@@ -10,14 +10,15 @@ The system runs as a set of Docker containers orchestrated with Docker Compose, 
 
 ### Services
 
-| Service            | Tech                        | Host | Description |
-|--------------------|-----------------------------|---|---|
-| **email-service**  | PHP 8.5 / Symfony 8.0       | `email.localhost` | Core API — accepts emails and returns analysis results |
-| **language-detector** | Python / FastAPI / FastText | `language.localhost` | Language identification microservice using FastText `lid.176.bin` model |
-| **embedding-service** | Python / FastAPI            | `embedding.localhost` | Embedding proxy + Weaviate schema management scripts |
-| **ollama**         | Ollama / llama3.1:8b        | `llm.localhost` | LLM for incident extraction, emotion analysis and embeddings |
-| **weaviate**       | Weaviate                    | (internal) | Vector database for storing and searching similar incidents |
-| **traefik**        | Traefik v3.x                | `localhost:80` | Reverse proxy, dashboard at `localhost:8088` |
+| Service               | Tech                              | Host              | Description |
+|-----------------------|-----------------------------------|-------------------|---|
+| **email-service**     | PHP 8.5 / Symfony 8.0             | `email.localhost` | Core API — accepts emails and returns analysis results |
+| **language-detector** | Python / FastAPI / FastText       | `language.localhost` | Language identification using FastText `lid.176.bin` model |
+| **embedding-service** | Python / FastAPI                  | `embedding.localhost` | Embedding proxy (nomic-embed-text via Ollama) |
+| **ollama**            | Ollama / llama3.1:8b              | `llm.localhost`   | LLM for incident extraction, emotion analysis and embeddings |
+| **postgres**          | PostgreSQL 16 + pgvector          | (internal)        | Vector database for storing and searching similar incidents |
+| **adminer**           | Adminer                           | `db.localhost`    | PostgreSQL web UI |
+| **traefik**           | Traefik v3.x                      | `localhost:80`    | Reverse proxy, dashboard at `localhost:8088` |
 
 ### Analysis flow (`POST /analyze`)
 
@@ -33,7 +34,7 @@ sequenceDiagram
     participant EmotionsContextPromptBuilder
     participant LLMExtractor
     participant Ollama
-    participant Weaviate
+    participant PostgreSQL
 
     Client->>AnalyzeController: POST /analyze (JSON)
     AnalyzeController->>AnalyzeController: Validate & build EmailData
@@ -49,8 +50,8 @@ sequenceDiagram
     EmbeddingService->>Ollama: POST /api/embeddings (nomic-embed-text)
     Ollama-->>EmbeddingService: Embedding vector
     EmbeddingService-->>IncidentContextBuilder: Embedding
-    IncidentContextBuilder->>Weaviate: nearVector search (+ optional filters)
-    Weaviate-->>IncidentContextBuilder: SimilarIncident[]
+    IncidentContextBuilder->>PostgreSQL: cosine similarity search (+ optional filters)
+    PostgreSQL-->>IncidentContextBuilder: SimilarIncident[]
     IncidentContextBuilder-->>AnalyzeController: IncidentContextBundle
 
     AnalyzeController->>IncidentContextPromptBuilder: buildSystemPrompt(bundle)
@@ -69,7 +70,7 @@ sequenceDiagram
     Ollama-->>LLMExtractor: JSON with emotions
     LLMExtractor-->>AnalyzeController: Emotions
 
-    AnalyzeController->>Weaviate: store incident (embedding + metadata)
+    AnalyzeController->>PostgreSQL: store incident (embedding + metadata)
     AnalyzeController-->>Client: JSON response
 ```
 
@@ -77,18 +78,9 @@ sequenceDiagram
 
 ```bash
 make up        # start containers
-make init      # install dependencies
+make init      # install dependencies + pull LLM models
 make sh        # shell into email-service
 make down      # stop containers
-```
-
-### Weaviate schema management
-
-```bash
-docker compose exec embedding-service python bootstrap.py          # create schema
-docker compose exec embedding-service python list.py               # list all schemas
-docker compose exec embedding-service python describe.py Incident  # describe schema
-docker compose exec embedding-service python delete.py Incident    # delete schema
 ```
 
 ## Configuration
@@ -100,12 +92,12 @@ Environment variables (`email-service/.env`):
 | `LANGUAGE_DETECTOR_URL` | `http://language-detector:8090` | Language detection service URL |
 | `LANGUAGE_DETECTOR_CONFIDENCE_THRESHOLD` | `0.5` | Minimum confidence for language detection |
 | `OLLAMA_URL` | `http://ollama:11434` | Ollama LLM service URL |
-| `OLLAMA_MODEL` | `llama3.1:8b` | LLM model name |
+| `OLLAMA_MODEL` | `llama3.1:8b` | LLM model for incident extraction and emotion analysis |
 | `OLLAMA_TEMPERATURE_INCIDENT` | `0.1` | Temperature for incident extraction |
 | `OLLAMA_TEMPERATURE_EMOTIONS` | `0.4` | Temperature for emotion analysis |
 | `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Embedding model name |
-| `WEAVIATE_URL` | `http://weaviate:8080` | Weaviate vector database URL |
-| `WEAVIATE_SIMILAR_INCIDENT_LIMIT` | `5` | Max similar incidents returned |
+| `POSTGRES_URL` | `pgsql://demo:demo@postgres:5432/analyzer` | PostgreSQL connection URL |
+| `POSTGRES_SIMILAR_INCIDENT_LIMIT` | `5` | Max similar incidents returned from vector search |
 
 ## API
 
@@ -119,7 +111,7 @@ Content-Type: application/json
 **Request:**
 ```json
 {
-  "received_at": "2026-03-13",
+  "received_at": "2026-03-13T10:00:00Z",
   "from": "sender@example.com",
   "to": "recipient@example.com",
   "subject": "Example subject",
@@ -131,17 +123,17 @@ Content-Type: application/json
 ```json
 {
   "incident_id": "INC-20260313-000001",
-  "received_at": "2026-03-13",
+  "received_at": "2026-03-13T10:00:00Z",
   "from": "sender@example.com",
   "to": "recipient@example.com",
   "subject": "Example subject",
   "language": "pl_PL",
   "incidents": [
     {
-      "device_type": "EN57",
-      "device_id": "1234",
+      "device_type": "lokomotywa",
+      "device_id": "EN57-1234",
       "location": "Kraków Główny",
-      "symptom": "device stopped",
+      "symptom": "przestała działać, gęsty dym z przedziału silnikowego",
       "priority": "critical"
     }
   ],
