@@ -6,18 +6,18 @@ AI-powered email analysis system that detects language, extracts device incident
 
 ## Architecture
 
-The system runs as a set of Docker containers orchestrated with Docker Compose, using **Traefik v3.0** as a reverse proxy.
+The system runs as a set of Docker containers orchestrated with Docker Compose, using **Traefik v3.x** as a reverse proxy.
 
 ### Services
 
-| Service | Tech | Host | Description |
-|---|---|---|---|
-| **email-service** | PHP 8.5 / Symfony 8.0 | `email.localhost` | Core API — accepts emails and returns analysis results |
+| Service            | Tech                        | Host | Description |
+|--------------------|-----------------------------|---|---|
+| **email-service**  | PHP 8.5 / Symfony 8.0       | `email.localhost` | Core API — accepts emails and returns analysis results |
 | **language-detector** | Python / FastAPI / FastText | `language.localhost` | Language identification microservice using FastText `lid.176.bin` model |
-| **embedding-service** | Python / FastAPI | `embedding.localhost` | Embedding proxy + Weaviate schema management scripts |
-| **ollama** | Ollama / llama3.1:8b | `llm.localhost` | LLM for incident extraction, emotion analysis and embeddings |
-| **weaviate** | Weaviate | (internal) | Vector database for storing and searching similar incidents |
-| **traefik** | Traefik v3.0 | `localhost:80` | Reverse proxy, dashboard at `localhost:8088` |
+| **embedding-service** | Python / FastAPI            | `embedding.localhost` | Embedding proxy + Weaviate schema management scripts |
+| **ollama**         | Ollama / llama3.1:8b        | `llm.localhost` | LLM for incident extraction, emotion analysis and embeddings |
+| **weaviate**       | Weaviate                    | (internal) | Vector database for storing and searching similar incidents |
+| **traefik**        | Traefik v3.x                | `localhost:80` | Reverse proxy, dashboard at `localhost:8088` |
 
 ### Analysis flow (`POST /analyze`)
 
