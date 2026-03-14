@@ -9,6 +9,8 @@ RUN cp $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 COPY --from=composer/composer:2-bin /composer /usr/bin/composer
 
+RUN install-php-extensions pdo_pgsql
+
 RUN apk update \
     && apk --no-cache add git zip vim bash
 

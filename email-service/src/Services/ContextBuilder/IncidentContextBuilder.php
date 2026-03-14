@@ -32,7 +32,7 @@ class IncidentContextBuilder
                 embedding:  $embedding,
 //                language: $isoCode->value,
 //                emailFrom: $emailData->from,
-//                emailDomain: $emailData->fromDomain
+                emailDomain: $emailData->fromDomain
             ),
             embedding: $embedding,
         );

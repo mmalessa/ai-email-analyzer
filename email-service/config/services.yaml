@@ -8,6 +8,8 @@ parameters:
     app.ollama_embedding_model: '%env(OLLAMA_EMBEDDING_MODEL)%'
     app.weaviate_url: '%env(WEAVIATE_URL)%'
     app.weaviate_similar_incident_limit: '%env(int:WEAVIATE_SIMILAR_INCIDENT_LIMIT)%'
+    app.postgres_url: '%env(POSTGRES_URL)%'
+    app.postgres_similar_incident_limit: '%env(int:POSTGRES_SIMILAR_INCIDENT_LIMIT)%'
 
 services:
     _defaults:
@@ -39,6 +41,15 @@ services:
             $baseUrl: '%app.weaviate_url%'
             $similarIncidentLimit: '%app.weaviate_similar_incident_limit%'
 
+    Doctrine\DBAL\Connection:
+        factory: ['App\Services\Shared\PostgresConnectionFactory', 'fromUrl']
+        arguments:
+            - '%app.postgres_url%'
+
+    App\Services\ContextBuilder\Repository\PostgresSimilarIncidentRepository:
+        arguments:
+            $similarIncidentLimit: '%app.postgres_similar_incident_limit%'
+
     App\Services\EmbeddingService\EmbeddingService: '@App\Services\EmbeddingService\OllamaEmbeddingService'
 
     App\EventListener\ExceptionListener:
@@ -49,4 +60,4 @@ services:
     App\Services\LLMExtractor\LLMExtractor: '@App\Services\LLMExtractor\OllamaLLMExtractor'
     App\Services\ContextBuilder\Repository\CandidateLocationRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateLocationRepository'
     App\Services\ContextBuilder\Repository\CandidateDeviceRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateDeviceRepository'
-    App\Services\ContextBuilder\Repository\SimilarIncidentRepository: '@App\Services\ContextBuilder\Repository\WeaviateSimilarIncidentRepository'
+    App\Services\ContextBuilder\Repository\SimilarIncidentRepository: '@App\Services\ContextBuilder\Repository\PostgresSimilarIncidentRepository'

@@ -7,5 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD python bootstrap.py && \
-    uvicorn app:app --host 0.0.0.0 --port 8091
+CMD uvicorn app:app --host 0.0.0.0 --port 8091

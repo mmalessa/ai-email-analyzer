@@ -63,10 +63,14 @@ class AnalyzeController
         $emotions = $this->llmExtractor->extractEmotions($emotionsSystemPrompt, $emailData->body);
         $this->logger->info('Emotions extracted', ['sentiment' => $emotions->sentiment, 'intensity' => $emotions->intensity]);
 
+        $firstIncident = $incidents[0] ?? null;
         $this->similarIncidentRepository->add(
             embedding: $incidentContextBundle->embedding,
             incidentId: $incidentId->value,
             text: $emailData->body,
+            device: $firstIncident?->deviceType,
+            location: $firstIncident?->location,
+            symptom: $firstIncident?->symptom,
             language: $isoCode->value,
             emailFrom: $emailData->from,
             emailDomain: $emailData->fromDomain,

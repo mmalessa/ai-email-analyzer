@@ -21,16 +21,13 @@ services:
             - "traefik.http.routers.ai-api.rule=Host(`email.localhost`)"
             - "traefik.http.routers.ai-api.entrypoints=web"
             - "traefik.http.services.ai-api.loadbalancer.server.port=8080"
-#        tty: true
         volumes:
             - ./email-service:/app
             - user_home:/home/appuser
         command: ["php","-S","0.0.0.0:8080","-t","public"]
         depends_on:
-#            - postgres
+            - postgres
             - ollama
-#            - weaviate
-#            - kafka
             - language-detector
         restart: unless-stopped
 
@@ -42,15 +39,30 @@ services:
             - "traefik.http.routers.lang.entrypoints=web"
             - "traefik.http.services.lang.loadbalancer.server.port=8090"
 
-#    postgres:
-#        image: postgres:16
-#        environment:
-#            POSTGRES_DB: analyzer
-#            POSTGRES_USER: demo
-#            POSTGRES_PASSWORD: demo
-#        volumes:
-#            - pgdata:/var/lib/postgresql/data
-#
+    postgres:
+        image: pgvector/pgvector:pg16
+        environment:
+            POSTGRES_DB: analyzer
+            POSTGRES_USER: demo
+            POSTGRES_PASSWORD: demo
+        volumes:
+            - pg_data:/var/lib/postgresql/data
+            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        labels:
+            - "traefik.enable=false"
+        restart: unless-stopped
+
+    adminer:
+        image: adminer
+        restart: unless-stopped
+        environment:
+            ADMINER_DEFAULT_SERVER: postgres
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.adminer.rule=Host(`db.localhost`)"
+            - "traefik.http.routers.adminer.entrypoints=web"
+            - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+
     ollama:
         image: ollama/ollama:latest
         container_name: ollama
@@ -72,17 +84,18 @@ services:
             - "traefik.http.services.embedding.loadbalancer.server.port=8091"
         restart: unless-stopped
         depends_on:
-            -   weaviate
+            -   postgres
 
-    weaviate:
-        image: semitechnologies/weaviate
-        labels:
-            - "traefik.enable=false"
-        environment:
-            QUERY_DEFAULTS_LIMIT: 20
-            AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
-        restart: unless-stopped
+#    weaviate:
+#        image: semitechnologies/weaviate
+#        labels:
+#            - "traefik.enable=false"
+#        environment:
+#            QUERY_DEFAULTS_LIMIT: 20
+#            AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+#        restart: unless-stopped
 
 volumes:
     user_home:
     ollama_models:
+    pg_data:

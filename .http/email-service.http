@@ -64,8 +64,8 @@ Content-Type: application/json
 
 {
   "received_at": "{{nowAtom}}",
-  "from": "maszynista@test.pl",
-  "to": "dilna@test.pl",
+  "from": "maszynista@test.cz",
+  "to": "dilna@test.cz",
   "subject": "Porucha lokomotivy",
   "body": "Na stanici Praha hlavní nádraží přestala fungovat lokomotiva č. EN57-1234. Z motorového prostoru vychází hustý kouř."
 }
