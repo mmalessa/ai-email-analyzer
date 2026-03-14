@@ -19,45 +19,45 @@ services:
     App\:
         resource: '../src/'
 
-    App\Services\LanguageDetector\LanguageDetectorFastText:
+    App\Service\LanguageDetector\LanguageDetectorFastText:
         arguments:
             $baseUrl: '%app.language_detector_url%'
             $confidenceThreshold: '%app.language_detector_confidence_threshold%'
 
-    App\Services\LLMExtractor\OllamaLLMExtractor:
+    App\Service\LLMExtractor\OllamaLLMExtractor:
         arguments:
             $baseUrl: '%app.ollama_url%'
             $model: '%app.ollama_model%'
             $temperatureIncident: '%app.ollama_temperature_incident%'
             $temperatureEmotions: '%app.ollama_temperature_emotions%'
 
-    App\Services\EmbeddingService\OllamaEmbeddingService:
+    App\Service\EmbeddingService\OllamaEmbeddingService:
         arguments:
             $baseUrl: '%app.ollama_url%'
             $model: '%app.ollama_embedding_model%'
 
-    App\Services\ContextBuilder\Repository\WeaviateSimilarIncidentRepository:
+    App\Repository\WeaviateSimilarIncidentRepository:
         arguments:
             $baseUrl: '%app.weaviate_url%'
             $similarIncidentLimit: '%app.weaviate_similar_incident_limit%'
 
     Doctrine\DBAL\Connection:
-        factory: ['App\Services\Shared\PostgresConnectionFactory', 'fromUrl']
+        factory: ['App\Service\Shared\PostgresConnectionFactory', 'fromUrl']
         arguments:
             - '%app.postgres_url%'
 
-    App\Services\ContextBuilder\Repository\PostgresSimilarIncidentRepository:
+    App\Repository\PostgresSimilarIncidentRepository:
         arguments:
             $similarIncidentLimit: '%app.postgres_similar_incident_limit%'
 
-    App\Services\EmbeddingService\EmbeddingService: '@App\Services\EmbeddingService\OllamaEmbeddingService'
+    App\Service\EmbeddingService\EmbeddingService: '@App\Service\EmbeddingService\OllamaEmbeddingService'
 
     App\EventListener\ExceptionListener:
         arguments:
             $appEnv: '%kernel.environment%'
 
-    App\Services\LanguageDetector\LanguageDetector: '@App\Services\LanguageDetector\LanguageDetectorFastText'
-    App\Services\LLMExtractor\LLMExtractor: '@App\Services\LLMExtractor\OllamaLLMExtractor'
-    App\Services\ContextBuilder\Repository\CandidateLocationRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateLocationRepository'
-    App\Services\ContextBuilder\Repository\CandidateDeviceRepository: '@App\Services\ContextBuilder\Repository\InMemoryCandidateDeviceRepository'
-    App\Services\ContextBuilder\Repository\SimilarIncidentRepository: '@App\Services\ContextBuilder\Repository\PostgresSimilarIncidentRepository'
+    App\Service\LanguageDetector\LanguageDetector: '@App\Service\LanguageDetector\LanguageDetectorFastText'
+    App\Service\LLMExtractor\LLMExtractor: '@App\Service\LLMExtractor\OllamaLLMExtractor'
+    App\Repository\CandidateLocationRepository: '@App\Repository\InMemoryCandidateLocationRepository'
+    App\Repository\CandidateDeviceRepository: '@App\Repository\InMemoryCandidateDeviceRepository'
+    App\Repository\SimilarIncidentRepository: '@App\Repository\PostgresSimilarIncidentRepository'

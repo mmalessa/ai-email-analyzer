@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Services\ContextBuilder\IncidentContextBuilder;
-use App\Services\ContextBuilder\Repository\SimilarIncidentRepository;
-use App\Services\ContextPromptBuilder\EmotionsContextPromptBuilder;
-use App\Services\ContextPromptBuilder\IncidentContextPromptBuilder;
-use App\Services\IncidentIdGenerator\IncidentIdGenerator;
-use App\Services\LanguageDetector\LanguageDetector;
-use App\Services\LLMExtractor\LLMExtractor;
-use App\Services\Shared\EmailData;
+use App\Service\ContextBuilder\IncidentContextBuilder;
+use App\Repository\SimilarIncidentRepository;
+use App\Service\ContextPromptBuilder\EmotionsContextPromptBuilder;
+use App\Service\ContextPromptBuilder\IncidentContextPromptBuilder;
+use App\Service\IncidentIdGenerator\IncidentIdGenerator;
+use App\Service\LanguageDetector\LanguageDetector;
+use App\Service\LLMExtractor\LLMExtractor;
+use App\Service\Shared\EmailData;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
