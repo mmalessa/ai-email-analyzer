@@ -52,6 +52,60 @@ Content-Type: application/json
   "body": "Na stacji w Krakowie Głównym w lokomotywie nr EN57-1234 zaświeciło się takie wesołe zielone światełko. Chyba nieistotne, ale wolę zapytać."
 }
 
+### Analyze email DE - nice
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "triebfahrzeugfuehrer@test.de",
+  "to": "werkstatt@test.de",
+  "subject": "Lämpchen in der Lokomotive",
+  "body": "Am Hauptbahnhof München hat sich in der Lokomotive Nr. EN57-1234 so ein fröhliches grünes Lämpchen eingeschaltet. Wahrscheinlich unwichtig, aber ich frage lieber nach."
+}
+
+### Analyze email IT - nice
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "macchinista@test.it",
+  "to": "officina@test.it",
+  "subject": "Lucina sulla locomotiva",
+  "body": "Alla stazione di Milano Centrale si è accesa una simpatica lucina verde sulla locomotiva n. E464-1234. Probabilmente non è nulla di grave, ma preferisco chiedere lo stesso."
+}
+
+### Analyze email HR - nice
+< {%
+    const now = new Date().toISOString();
+    request.variables.set("nowAtom", now);
+%}
+
+POST http://email.localhost/analyze
+Accept: application/json
+Content-Type: application/json
+
+{
+  "received_at": "{{nowAtom}}",
+  "from": "strojovoda@test.hr",
+  "to": "radionica@test.hr",
+  "subject": "Lampica na lokomotivi",
+  "body": "Na kolodvoru Zagreb Glavni upalila se jedna vesela zelena lampica na lokomotivi br. HŽ-1234. Vjerojatno nije ništa važno, ali wolim pitati."
+}
+
 ### Analyze email CS
 < {%
     const now = new Date().toISOString();
