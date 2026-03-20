@@ -5,26 +5,24 @@ declare(strict_types=1);
 namespace App\Service\IncidentIdGenerator;
 
 use App\Service\Shared\IncidentId;
-use Psr\Cache\CacheItemPoolInterface;
+use Doctrine\DBAL\Connection;
 
 class IncidentIdGenerator
 {
     public function __construct(
-        private CacheItemPoolInterface $cache,
+        private Connection $connection,
     ) {}
 
     public function generate(): IncidentId
     {
         $today = date('Ymd');
-        $cacheKey = 'incident_seq_' . $today;
 
-        $item = $this->cache->getItem($cacheKey);
+        $max = $this->connection->fetchOne(
+            "SELECT MAX(CAST(RIGHT(incident_id, 6) AS INTEGER)) FROM incidents WHERE incident_id LIKE :prefix",
+            ['prefix' => 'INC-' . $today . '-%'],
+        );
 
-        $sequence = $item->isHit() ? $item->get() + 1 : 1;
-
-        $item->set($sequence);
-        $item->expiresAfter(86400);
-        $this->cache->save($item);
+        $sequence = ($max === null || $max === false) ? 1 : (int) $max + 1;
 
         return new IncidentId(sprintf('INC-%s-%06d', $today, $sequence));
     }
