@@ -10,7 +10,7 @@ use App\Service\Shared\Incident;
 interface LLMExtractor
 {
     /** @return Incident[] */
-    public function extractIncident(string $systemPrompt, string $emailBody): array;
+    public function extractIncident(string $systemPrompt, string $emailBody, string $model, float $temperature): array;
 
-    public function extractEmotions(string $systemPrompt, string $text): Emotions;
+    public function extractEmotions(string $systemPrompt, string $text, string $model, float $temperature): Emotions;
 }

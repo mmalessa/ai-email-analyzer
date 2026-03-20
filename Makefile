@@ -41,5 +41,6 @@ init-php: ## Init php-based services
 .PHONY: init-llm
 init-llm: ## Init ollama
 	@$(DC) exec ollama sh -c "ollama pull llama3.1:8b"
-	@$(DC) exec ollama sh -c "ollama pull mixtral:8x7b"
+	@$(DC) exec ollama sh -c "ollama pull gemma2:9b"
+	@#$(DC) exec ollama sh -c "ollama pull mixtral:8x7b"
 	@$(DC) exec ollama sh -c "ollama pull nomic-embed-text"

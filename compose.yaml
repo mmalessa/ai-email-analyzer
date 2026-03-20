@@ -50,18 +50,20 @@ services:
             - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
         labels:
             - "traefik.enable=false"
+        ports:
+            -   "5432:5432"
         restart: unless-stopped
 
-    adminer:
-        image: adminer
-        restart: unless-stopped
-        environment:
-            ADMINER_DEFAULT_SERVER: postgres
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.adminer.rule=Host(`db.localhost`)"
-            - "traefik.http.routers.adminer.entrypoints=web"
-            - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+#    adminer:
+#        image: adminer
+#        restart: unless-stopped
+#        environment:
+#            ADMINER_DEFAULT_SERVER: postgres
+#        labels:
+#            - "traefik.enable=true"
+#            - "traefik.http.routers.adminer.rule=Host(`db.localhost`)"
+#            - "traefik.http.routers.adminer.entrypoints=web"
+#            - "traefik.http.services.adminer.loadbalancer.server.port=8080"
 
     ollama:
         image: ollama/ollama:latest

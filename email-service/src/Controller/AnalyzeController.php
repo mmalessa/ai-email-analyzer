@@ -29,6 +29,10 @@ class AnalyzeController
         private IncidentIdGenerator $incidentIdGenerator,
         private SimilarIncidentRepository $similarIncidentRepository,
         private LoggerInterface $logger,
+        private string $ollamaModelIncident,
+        private string $ollamaModelEmotions,
+        private float $temperatureIncident,
+        private float $temperatureEmotions,
     ) {}
 
     #[Route('/analyze', methods: ['POST'])]
@@ -56,11 +60,11 @@ class AnalyzeController
         ]);
 
         $incidentSystemPrompt = $this->incidentContextPromptBuilder->buildSystemPrompt($incidentContextBundle);
-        $incidents = $this->llmExtractor->extractIncident($incidentSystemPrompt, $emailData->body);
+        $incidents = $this->llmExtractor->extractIncident($incidentSystemPrompt, $emailData->body, $this->ollamaModelIncident, $this->temperatureIncident);
         $this->logger->info('Incidents extracted', ['count' => count($incidents)]);
 
         $emotionsSystemPrompt = $this->emotionsContextPromptBuilder->buildSystemPrompt();
-        $emotions = $this->llmExtractor->extractEmotions($emotionsSystemPrompt, $emailData->body);
+        $emotions = $this->llmExtractor->extractEmotions($emotionsSystemPrompt, $emailData->body, $this->ollamaModelEmotions, $this->temperatureEmotions);
         $this->logger->info('Emotions extracted', ['sentiment' => $emotions->sentiment, 'intensity' => $emotions->intensity]);
 
         $firstIncident = $incidents[0] ?? null;

@@ -15,15 +15,12 @@ class OllamaLLMExtractor implements LLMExtractor
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
         private string $baseUrl,
-        private string $model,
-        private float $temperatureIncident,
-        private float $temperatureEmotions,
     ) {}
 
     /** @return Incident[] */
-    public function extractIncident(string $systemPrompt, string $emailBody): array
+    public function extractIncident(string $systemPrompt, string $emailBody, string $model, float $temperature): array
     {
-        $parsed = $this->chat($systemPrompt, $emailBody, $this->temperatureIncident);
+        $parsed = $this->chat($systemPrompt, $emailBody, $model, $temperature);
         $incidents = $parsed['incidents'] ?? [];
 
         return array_map(
@@ -38,9 +35,9 @@ class OllamaLLMExtractor implements LLMExtractor
         );
     }
 
-    public function extractEmotions(string $systemPrompt, string $text): Emotions
+    public function extractEmotions(string $systemPrompt, string $text, string $model, float $temperature): Emotions
     {
-        $parsed = $this->chat($systemPrompt, $text, $this->temperatureEmotions);
+        $parsed = $this->chat($systemPrompt, $text, $model, $temperature);
 
         return new Emotions(
             sentiment: $parsed['sentiment'] ?? 'neutral',
@@ -50,7 +47,7 @@ class OllamaLLMExtractor implements LLMExtractor
         );
     }
 
-    private function chat(string $systemPrompt, string $userMessage, float $temperature): array
+    private function chat(string $systemPrompt, string $userMessage, string $model, float $temperature): array
     {
         $url = $this->baseUrl . '/v1/chat/completions';
 
@@ -60,7 +57,7 @@ class OllamaLLMExtractor implements LLMExtractor
                 $url,
                 [
                     'json' => [
-                        'model' => $this->model,
+                        'model' => $model,
                         'temperature' => $temperature,
                         'messages' => [
                             [

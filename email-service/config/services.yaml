@@ -1,7 +1,8 @@
 parameters:
     app.language_detector_url: '%env(LANGUAGE_DETECTOR_URL)%'
     app.ollama_url: '%env(OLLAMA_URL)%'
-    app.ollama_model: '%env(OLLAMA_MODEL)%'
+    app.ollama_model_incident: '%env(OLLAMA_MODEL_INCIDENT)%'
+    app.ollama_model_emotions: '%env(OLLAMA_MODEL_EMOTIONS)%'
     app.ollama_temperature_incident: '%env(float:OLLAMA_TEMPERATURE_INCIDENT)%'
     app.ollama_temperature_emotions: '%env(float:OLLAMA_TEMPERATURE_EMOTIONS)%'
     app.language_detector_confidence_threshold: '%env(float:LANGUAGE_DETECTOR_CONFIDENCE_THRESHOLD)%'
@@ -27,7 +28,11 @@ services:
     App\Service\LLMExtractor\OllamaLLMExtractor:
         arguments:
             $baseUrl: '%app.ollama_url%'
-            $model: '%app.ollama_model%'
+
+    App\Controller\AnalyzeController:
+        arguments:
+            $ollamaModelIncident: '%app.ollama_model_incident%'
+            $ollamaModelEmotions: '%app.ollama_model_emotions%'
             $temperatureIncident: '%app.ollama_temperature_incident%'
             $temperatureEmotions: '%app.ollama_temperature_emotions%'
 
