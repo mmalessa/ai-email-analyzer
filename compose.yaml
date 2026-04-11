@@ -75,6 +75,14 @@ services:
             - "traefik.http.services.ollama.loadbalancer.server.port=11434"
         volumes:
             - ollama_models:/root/.ollama/models
+        # comment "deploy" to use CPU only
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [gpu]
         restart: unless-stopped
 
     embedding-service:
